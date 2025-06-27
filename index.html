@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>5-Day Weather Forecast</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #1565c0;
+    }
+    input {
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      border: 1px solid #90caf9;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+    .weather-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .weather-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #90caf9;
+      padding: 20px;
+      margin: 10px;
+      width: 180px;
+    }
+    .weather-card h3 {
+      margin: 0;
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+
+<h1>5-Day Weather Forecast</h1>
+
+<input type="text" id="cityInput" placeholder="Enter city name">
+<button onclick="getWeatherByCity()">Search</button>
+<button onclick="detectLocation()">Use My Location</button>
+
+<div class="weather-container" id="weatherContainer"></div>
+
+<script>
+  const API_KEY = "YOUR_API_KEY"; // Replace with your OpenWeatherMap API key
+
+  function getWeatherByCity() {
+    const city = document.getElementById('cityInput').value.trim();
+    if (city === "") return alert("Please enter a city name.");
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}`;
+    fetchWeather(url);
+  }
+
+  function detectLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`;
+        fetchWeather(url);
+      }, () => {
+        alert("Location access denied.");
+      });
+    } else {
+      alert("Geolocation not supported.");
+    }
+  }
+
+  async function fetchWeather(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("City not found");
+      const data = await response.json();
+      const forecasts = data.list.filter((_, index) => index % 8 === 0);
+      displayWeather(forecasts, data.city.name);
+    } catch (err) {
+      document.getElementById('weatherContainer').innerHTML = `<p style="color:red;">${err.message}</p>`;
+    }
+  }
+
+  function displayWeather(forecasts, cityName) {
+    const container = document.getElementById('weatherContainer
